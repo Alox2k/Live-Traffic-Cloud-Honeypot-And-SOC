@@ -20,33 +20,26 @@ Unlike standard cloud deployments, this project utilizes a **Hybrid Architecture
 The architecture consists of an intentionally vulnerable cloud instance forwarding logs securely to a local analyst machine via a zero-trust tunnel.
 
 ```mermaid
-graph LR
-    %% Definitions of the main nodes
-    subgraph Internet [The Internet / Attackers]
-        Hacker(Attacker Bots & Scanners)
+graph TD
+    %% Nodes
+    Attacker((🛑 ATTACKER))
+    
+    subgraph Azure_Cloud [☁️ Microsoft Azure Cloud]
+        NSG{🛡️ NSG Firewall}
+        VM[🖥️ Ubuntu Honeypot VM]
+    end
+    
+    subgraph Home_Lab [🏠 Local Network / SOC]
+        Manager[📊 Wazuh SIEM Manager]
     end
 
-    subgraph Azure_Cloud [Azure Cloud Platform]
-        NSG{NSG Firewall}
-        VM[Ubuntu Honeypot VM]
-    end
-
-    subgraph Home_Lab [Local SOC / Mac]
-        Wazuh[Wazuh SIEM Manager]
-    end
-
-    %% Connections and Traffic Flow
-    Hacker -- "SSH Brute Force Traffic (Port 22)" --> NSG
+    %% Connections
+    Attacker -- "SSH Brute Force (Port 22)" --> NSG
     NSG -- "Allowed Traffic" --> VM
-    VM -- "Encrypted Log Shipping (Tailscale VPN)" --> Wazuh
+    VM == "Encrypted Log Tunnel (Tailscale)" ==> Manager
 
-    %% Styling for a professional look
-    classDef attacker fill:#ffcccb,stroke:#ff0000,stroke-width:2px;
-    classDef cloud fill:#cce5ff,stroke:#0066cc,stroke-width:2px;
-    classDef soc fill:#d4edda,stroke:#28a745,stroke-width:2px;
-    classDef firewall fill:#fff3cd,stroke:#ffc107,stroke-width:2px,stroke-dasharray: 5 5;
-
-    class Hacker attacker;
-    class VM,Azure_Cloud cloud;
-    class Wazuh,Home_Lab soc;
-    class NSG firewall;
+    %% Styling
+    style Attacker fill:#ff4d4d,stroke:#333,stroke-width:4px,color:white
+    style VM fill:#0078D4,stroke:#333,stroke-width:2px,color:white
+    style Manager fill:#00cc66,stroke:#333,stroke-width:2px,color:white
+    style NSG fill:#ffcc00,stroke:#333,stroke-width:2px
