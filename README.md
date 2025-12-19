@@ -104,6 +104,16 @@ Specific log entry showing **MITRE ATT&CK T1110 (Brute Force)** mapping and GeoL
 
 ---
 
+## 📸 Project Screenshots
+
+### Real-time Attack Map
+![World Map](./images/map.png)
+
+### Brute Force Detection Details
+![Log Details](./images/log_detail.png)
+
+---
+
 ## 🔗 References
 * [Wazuh Documentation](https://documentation.wazuh.com)
 * [MITRE ATT&CK T1110](https://attack.mitre.org/techniques/T1110/)
