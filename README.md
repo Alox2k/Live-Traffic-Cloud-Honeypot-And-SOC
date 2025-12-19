@@ -43,3 +43,68 @@ graph TD
     style VM fill:#0078D4,stroke:#333,stroke-width:2px,color:white
     style Manager fill:#00cc66,stroke:#333,stroke-width:2px,color:white
     style NSG fill:#ffcc00,stroke:#333,stroke-width:2px
+```
+
+# Azure + Wazuh Honeypot Project
+
+## 🛠️ Technology Stack
+* **Cloud Provider:** Microsoft Azure (Standard B1s VM)
+* **Operating System:** Ubuntu 22.04 LTS
+* **SIEM / XDR:** Wazuh (Manager & Dashboard via Docker)
+* **Networking:** Tailscale (Zero Trust Mesh VPN)
+* **Telemetry:** Syslog, Auth.log, SSHD
+* **Visualization:** OpenSearch Dashboards
+
+---
+
+## ⚙️ Implementation Steps
+
+### Phase 1: The Setup
+* **Deployed** an Ubuntu VM on Azure.
+* **Configured** the Network Security Group (NSG) to allow inbound traffic on **Port 22** from **Any** source (The Honey Trap).
+* **Configured** a "Default Deny" policy for all other non-essential ports.
+
+### Phase 2: The Infrastructure
+* **Installed Wazuh Manager** locally on macOS using Docker Compose to preserve cloud costs.
+* **Installed Tailscale** on both the Azure VM and the local Mac to create a private subnet.
+* *Outcome:* This allowed the Wazuh Agent (Cloud) to talk to the Manager (Local) through a secure tunnel, bypassing the public internet for log transmission.
+
+### Phase 3: The Detection
+* **Deployed** the Wazuh Agent on the Azure VM.
+* **Configured** the agent to monitor `/var/log/auth.log` for SSH authentication failures.
+* **Verified** log ingestion and created custom alerts for high-intensity brute force attacks.
+
+### Phase 4: Visualization
+* **Enabled** the GeoIP module in Wazuh to correlate Source IPs with physical locations.
+* **Built** a custom dashboard in OpenSearch to plot attack origins on a world map in real-time.
+
+---
+
+## 📊 Results & Visualization
+
+### 1. Global Attack Map
+Visualizing the origin of IPs attempting unauthorized SSH connections.
+*(Note: This map shows the geo-location of attackers targeting the Azure VM)*
+
+### 2. Alert & Detection Details
+Specific log entry showing **MITRE ATT&CK T1110 (Brute Force)** mapping and GeoLocation enrichment.
+
+---
+
+## 🧠 Challenges & Learnings
+
+> **Public IP SKU**
+> I learned that Azure Standard Public IPs require explicit NSG associations at the NIC level, whereas Basic IPs are open by default. This required troubleshooting "0 Effective Rules" to get traffic flowing.
+
+> **ICMP vs. TCP**
+> Investigated why "Ping" failed while SSH worked; learned that Azure blocks ICMP by default and that service availability (TCP) is distinct from network reachability (ICMP).
+
+> **Log Buffering**
+> Managing log flow in a hybrid environment where the local receiver might be offline (sleeping Mac) required understanding the Wazuh Agent's buffer capabilities to prevent data loss.
+
+---
+
+## 🔗 References
+* [Wazuh Documentation](https://documentation.wazuh.com)
+* [MITRE ATT&CK T1110](https://attack.mitre.org/techniques/T1110/)
+* [Tailscale Documentation](https://tailscale.com/kb/)
